@@ -37,26 +37,39 @@ onMounted(() => {
     ease: 'power1.inOut'
   })
 
-  // Mouse move parallax effect
+  // Mouse move parallax effect - subtle movement
   if (heroRef.value) {
     heroRef.value.addEventListener('mousemove', (e) => {
       const { clientX, clientY } = e
       const { innerWidth, innerHeight } = window
       
-      const xPos = (clientX / innerWidth - 0.5) * 50
-      const yPos = (clientY / innerHeight - 0.5) * 50
+      const xPos = (clientX / innerWidth - 0.5) * 20
+      const yPos = (clientY / innerHeight - 0.5) * 20
 
       gsap.to(titleRef.value, {
         x: xPos,
-        y: yPos,
         duration: 0.5,
         ease: 'power2.out'
       })
 
       gsap.to(subtitleRef.value, {
         x: xPos * 0.5,
-        y: yPos * 0.5,
         duration: 0.7,
+        ease: 'power2.out'
+      })
+    })
+
+    // Reset position when mouse leaves
+    heroRef.value.addEventListener('mouseleave', () => {
+      gsap.to(titleRef.value, {
+        x: 0,
+        duration: 0.8,
+        ease: 'power2.out'
+      })
+
+      gsap.to(subtitleRef.value, {
+        x: 0,
+        duration: 0.8,
         ease: 'power2.out'
       })
     })
@@ -111,6 +124,9 @@ const scrollToDownload = () => {
   text-align: center;
   z-index: 2;
   padding: 0 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .hero-title {
