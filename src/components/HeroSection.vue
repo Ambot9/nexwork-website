@@ -5,75 +5,34 @@ import gsap from 'gsap'
 const heroRef = ref<HTMLElement | null>(null)
 const titleRef = ref<HTMLElement | null>(null)
 const subtitleRef = ref<HTMLElement | null>(null)
+const descriptionRef = ref<HTMLElement | null>(null)
 const ctaRef = ref<HTMLElement | null>(null)
 
 onMounted(() => {
-  // Hero entrance animation
-  const tl = gsap.timeline({ defaults: { ease: 'power4.out' } })
+  // Hero entrance animation - staggered and smooth
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
   tl.from(titleRef.value, {
-    y: 100,
-    opacity: 0,
-    duration: 1.2,
-    delay: 0.3
-  })
-  .from(subtitleRef.value, {
-    y: 50,
+    y: 60,
     opacity: 0,
     duration: 1,
-  }, '-=0.6')
-  .from(ctaRef.value, {
+    delay: 0.2
+  })
+  .from(subtitleRef.value, {
+    y: 40,
+    opacity: 0,
+    duration: 0.9,
+  }, '-=0.5')
+  .from(descriptionRef.value, {
     y: 30,
     opacity: 0,
     duration: 0.8,
   }, '-=0.4')
-
-  // Floating animation for title
-  gsap.to(titleRef.value, {
-    y: -10,
-    duration: 2,
-    repeat: -1,
-    yoyo: true,
-    ease: 'power1.inOut'
-  })
-
-  // Mouse move parallax effect - subtle movement
-  if (heroRef.value) {
-    heroRef.value.addEventListener('mousemove', (e) => {
-      const { clientX, clientY } = e
-      const { innerWidth, innerHeight } = window
-      
-      const xPos = (clientX / innerWidth - 0.5) * 20
-      const yPos = (clientY / innerHeight - 0.5) * 20
-
-      gsap.to(titleRef.value, {
-        x: xPos,
-        duration: 0.5,
-        ease: 'power2.out'
-      })
-
-      gsap.to(subtitleRef.value, {
-        x: xPos * 0.5,
-        duration: 0.7,
-        ease: 'power2.out'
-      })
-    })
-
-    // Reset position when mouse leaves
-    heroRef.value.addEventListener('mouseleave', () => {
-      gsap.to(titleRef.value, {
-        x: 0,
-        duration: 0.8,
-        ease: 'power2.out'
-      })
-
-      gsap.to(subtitleRef.value, {
-        x: 0,
-        duration: 0.8,
-        ease: 'power2.out'
-      })
-    })
-  }
+  .from(ctaRef.value, {
+    y: 20,
+    opacity: 0,
+    duration: 0.7,
+  }, '-=0.3')
 })
 
 const scrollToDownload = () => {
@@ -87,22 +46,23 @@ const scrollToDownload = () => {
 <template>
   <section ref="heroRef" class="hero">
     <div class="hero-content">
+      <div class="badge">Developer Tools</div>
       <h1 ref="titleRef" class="hero-title">
-        <span class="title-line">NEXWORK</span>
-        <span class="title-line">DESKTOP</span>
+        Multi-repository<br>feature management,<br><span class="gradient-text">simplified.</span>
       </h1>
       <p ref="subtitleRef" class="hero-subtitle">
-        Multi-repository feature management.<br>
-        Powered by git worktrees.
+        Nexwork Desktop streamlines your workflow with git worktrees.
       </p>
-      <button ref="ctaRef" @click="scrollToDownload" class="cta-button">
-        DOWNLOAD NOW
-        <span class="arrow">→</span>
-      </button>
-    </div>
-    <div class="scroll-indicator">
-      <div class="mouse">
-        <div class="wheel"></div>
+      <p ref="descriptionRef" class="hero-description">
+        Manage features across multiple repositories with ease. Built for developers who value efficiency and elegance.
+      </p>
+      <div ref="ctaRef" class="cta-group">
+        <button @click="scrollToDownload" class="cta-button primary">
+          Download for macOS
+        </button>
+        <a href="https://github.com/Ambot9/nexwork-desktop" target="_blank" class="cta-button secondary">
+          View on GitHub
+        </a>
       </div>
     </div>
   </section>
@@ -112,158 +72,156 @@ const scrollToDownload = () => {
 .hero {
   position: relative;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  padding: 8rem 2rem;
   z-index: 1;
 }
 
 .hero-content {
   text-align: center;
   z-index: 2;
-  padding: 0 2rem;
-  max-width: 1400px;
+  max-width: 900px;
   width: 100%;
   margin: 0 auto;
 }
 
-.hero-title {
-  font-size: clamp(4rem, 12vw, 10rem);
-  font-weight: 900;
-  letter-spacing: -0.05em;
-  line-height: 0.9;
-  margin-bottom: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.badge {
+  display: inline-block;
+  padding: 0.5rem 1.2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.05em;
+  margin-bottom: 2.5rem;
+  backdrop-filter: blur(10px);
 }
 
-.title-line {
-  display: block;
-  background: linear-gradient(135deg, #ffffff 0%, #888888 100%);
+.hero-title {
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #666666 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
 }
 
 .hero-subtitle {
-  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-  font-weight: 300;
-  color: #cccccc;
-  margin-bottom: 3rem;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1rem;
   line-height: 1.6;
 }
 
+.hero-description {
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 3rem;
+  line-height: 1.8;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .cta-button {
-  padding: 1.5rem 3rem;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  background-color: #ffffff;
-  color: #000000;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 1rem;
-}
-
-.cta-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.3), transparent);
-  transition: left 0.5s ease;
-}
-
-.cta-button:hover::before {
-  left: 100%;
-}
-
-.cta-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 40px rgba(255, 255, 255, 0.3);
-}
-
-.cta-button:hover .arrow {
-  transform: translateX(5px);
-}
-
-.arrow {
-  transition: transform 0.3s ease;
-  font-size: 1.5rem;
-}
-
-.scroll-indicator {
-  position: absolute;
-  bottom: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-}
-
-.mouse {
-  width: 30px;
-  height: 50px;
-  border: 2px solid #ffffff;
-  border-radius: 15px;
+  justify-content: center;
   position: relative;
-  animation: float 2s ease-in-out infinite;
+  overflow: hidden;
 }
 
-.wheel {
-  width: 6px;
-  height: 10px;
+.cta-button.primary {
   background: #ffffff;
-  border-radius: 3px;
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: scroll 2s ease-in-out infinite;
+  color: #000000;
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.15);
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+.cta-button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.95);
 }
 
-@keyframes scroll {
-  0% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(20px);
-  }
+.cta-button.secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.cta-button.secondary:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.cta-button:active {
+  transform: translateY(0);
 }
 
 @media (max-width: 768px) {
+  .hero {
+    padding: 6rem 1.5rem;
+    min-height: 90vh;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 1rem;
+  }
+
   .hero-title {
-    font-size: 3rem;
+    font-size: 2.5rem;
+    margin-bottom: 1.25rem;
   }
 
   .hero-subtitle {
-    font-size: 1.2rem;
+    font-size: 1.125rem;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .cta-group {
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   .cta-button {
-    padding: 1rem 2rem;
-    font-size: 1rem;
+    width: 100%;
+    padding: 0.875rem 1.5rem;
   }
 }
 </style>

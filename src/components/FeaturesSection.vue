@@ -109,9 +109,14 @@ const setFeatureRef = (el: any) => {
 <template>
   <section ref="sectionRef" class="features">
     <div class="container">
-      <h2 class="features-title">
-        <span class="title-accent">POWERFUL</span> FEATURES
-      </h2>
+      <div class="section-header">
+        <h2 class="section-title">
+          Everything you need to<br><span class="gradient-text">manage features</span>
+        </h2>
+        <p class="section-subtitle">
+          Built for developers who demand efficiency and elegance in their workflow.
+        </p>
+      </div>
       <div class="features-grid">
         <div
           v-for="(feature, index) in features"
@@ -122,7 +127,6 @@ const setFeatureRef = (el: any) => {
           <div class="feature-icon">{{ feature.icon }}</div>
           <h3 class="feature-title">{{ feature.title }}</h3>
           <p class="feature-description">{{ feature.description }}</p>
-          <div class="feature-shine"></div>
         </div>
       </div>
     </div>
@@ -132,111 +136,103 @@ const setFeatureRef = (el: any) => {
 <style scoped>
 .features {
   position: relative;
-  padding: 8rem 0;
-  background: linear-gradient(180deg, #000000 0%, #111111 100%);
+  padding: 10rem 0;
+  background: #000000;
   z-index: 1;
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
-.features-title {
-  font-size: clamp(3rem, 8vw, 5rem);
-  font-weight: 900;
+.section-header {
   text-align: center;
-  margin-bottom: 5rem;
-  letter-spacing: -0.02em;
+  margin-bottom: 6rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.title-accent {
+.section-title {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+}
+
+.gradient-text {
   background: linear-gradient(135deg, #ffffff 0%, #666666 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+.section-subtitle {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.7;
+}
+
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
 }
 
 .feature-card {
   position: relative;
-  padding: 3rem 2rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2.5rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.5s ease;
-}
-
-.feature-card:hover::before {
-  left: 100%;
 }
 
 .feature-card:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-4px);
 }
 
 .feature-icon {
-  font-size: 4rem;
+  font-size: 2.5rem;
   margin-bottom: 1.5rem;
-  filter: grayscale(100%) brightness(200%);
+  opacity: 0.9;
 }
 
 .feature-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
   color: #ffffff;
+  letter-spacing: -0.01em;
 }
 
 .feature-description {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: #cccccc;
-}
-
-.feature-shine {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.feature-card:hover .feature-shine {
-  opacity: 1;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
 }
 
 @media (max-width: 768px) {
   .features {
-    padding: 5rem 0;
+    padding: 6rem 0;
+  }
+
+  .section-header {
+    margin-bottom: 4rem;
   }
 
   .features-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   .feature-card {

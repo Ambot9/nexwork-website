@@ -96,27 +96,36 @@ const downloadFile = (url: string) => {
 <template>
   <section id="download" class="download">
     <div class="container">
-      <h2 class="download-title">
-        GET <span class="title-accent">NEXWORK</span>
-      </h2>
+      <div class="section-header">
+        <h2 class="section-title">
+          Ready to <span class="gradient-text">get started?</span>
+        </h2>
+        <p class="section-subtitle">
+          Download Nexwork Desktop and streamline your workflow today.
+        </p>
+      </div>
 
       <div v-if="loading" class="loading">
         <div class="spinner"></div>
-        <p>Loading download links...</p>
+        <p>Loading download...</p>
       </div>
 
       <div v-else-if="error" class="error">
         <p>{{ error }}</p>
         <a href="https://github.com/Ambot9/nexwork-desktop/releases" target="_blank" class="github-link">
-          Visit GitHub Releases →
+          View on GitHub →
         </a>
       </div>
 
       <div v-else class="download-content">
         <div class="download-card">
-          <div class="version-badge">{{ release?.tag_name }}</div>
-          <h3 class="platform">macOS</h3>
-          <p class="platform-desc">For Apple Silicon & Intel Macs</p>
+          <div class="card-header">
+            <div class="platform-icon">💻</div>
+            <div>
+              <h3 class="platform-name">macOS</h3>
+              <p class="platform-desc">Universal Binary • {{ release?.tag_name }}</p>
+            </div>
+          </div>
           
           <div class="download-buttons">
             <button 
@@ -124,11 +133,8 @@ const downloadFile = (url: string) => {
               @click="downloadFile(dmgAsset.browser_download_url)"
               class="download-btn primary"
             >
-              <span class="btn-icon">💾</span>
-              <span class="btn-text">
-                <span class="btn-label">Download DMG</span>
-                <span class="btn-size">{{ formatFileSize(dmgAsset.size) }}</span>
-              </span>
+              <span class="btn-label">Download DMG</span>
+              <span class="btn-meta">{{ formatFileSize(dmgAsset.size) }} • Recommended</span>
             </button>
 
             <button 
@@ -136,34 +142,38 @@ const downloadFile = (url: string) => {
               @click="downloadFile(zipAsset.browser_download_url)"
               class="download-btn secondary"
             >
-              <span class="btn-icon">📦</span>
-              <span class="btn-text">
-                <span class="btn-label">Download ZIP</span>
-                <span class="btn-size">{{ formatFileSize(zipAsset.size) }}</span>
-              </span>
+              <span class="btn-label">Download ZIP</span>
+              <span class="btn-meta">{{ formatFileSize(zipAsset.size) }} • Portable</span>
             </button>
           </div>
 
           <div class="requirements">
-            <p>macOS 10.15 (Catalina) or later</p>
+            <span class="req-icon">ℹ️</span>
+            <span>macOS 10.15 (Catalina) or later</span>
           </div>
         </div>
 
-        <div class="platform-grid">
-          <div class="platform-info">
+        <div class="info-grid">
+          <div class="info-item">
             <div class="info-icon">🍎</div>
-            <h4>Universal Binary</h4>
-            <p>Optimized for both Intel and Apple Silicon</p>
+            <div class="info-content">
+              <h4>Universal Binary</h4>
+              <p>Native support for Intel and Apple Silicon</p>
+            </div>
           </div>
-          <div class="platform-info">
+          <div class="info-item">
             <div class="info-icon">⚡</div>
-            <h4>Instant Updates</h4>
-            <p>Auto-update built-in for seamless upgrades</p>
+            <div class="info-content">
+              <h4>Auto Updates</h4>
+              <p>Stay current with seamless updates</p>
+            </div>
           </div>
-          <div class="platform-info">
+          <div class="info-item">
             <div class="info-icon">🔒</div>
-            <h4>Secure Download</h4>
-            <p>Directly from GitHub releases</p>
+            <div class="info-content">
+              <h4>Secure</h4>
+              <p>Downloaded directly from GitHub</p>
+            </div>
           </div>
         </div>
       </div>
@@ -174,30 +184,43 @@ const downloadFile = (url: string) => {
 <style scoped>
 .download {
   position: relative;
-  padding: 8rem 0;
+  padding: 10rem 0;
   background: #000000;
   z-index: 1;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
-.download-title {
-  font-size: clamp(3rem, 8vw, 5rem);
-  font-weight: 900;
+.section-header {
   text-align: center;
-  margin-bottom: 5rem;
-  letter-spacing: -0.02em;
+  margin-bottom: 4rem;
 }
 
-.title-accent {
+.section-title {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+}
+
+.gradient-text {
   background: linear-gradient(135deg, #ffffff 0%, #666666 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.section-subtitle {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.7;
 }
 
 .loading, .error {
@@ -206,8 +229,8 @@ const downloadFile = (url: string) => {
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border: 3px solid rgba(255, 255, 255, 0.1);
   border-top-color: #ffffff;
   border-radius: 50%;
@@ -220,96 +243,69 @@ const downloadFile = (url: string) => {
 }
 
 .github-link {
-  color: #ffffff;
+  color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
-  border-bottom: 2px solid #ffffff;
-  transition: opacity 0.3s ease;
+  transition: color 0.3s ease;
 }
 
 .github-link:hover {
-  opacity: 0.7;
+  color: #ffffff;
 }
 
 .download-content {
   display: flex;
   flex-direction: column;
-  gap: 4rem;
+  gap: 3rem;
 }
 
 .download-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  padding: 4rem 3rem;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 3rem;
+  backdrop-filter: blur(10px);
 }
 
-.download-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
-  animation: rotate 20s linear infinite;
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
-@keyframes rotate {
-  to { transform: rotate(360deg); }
-}
-
-.version-badge {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  padding: 0.5rem 1rem;
-  background: #ffffff;
-  color: #000000;
-  font-weight: 700;
-  font-size: 0.9rem;
-  letter-spacing: 0.05em;
-}
-
-.platform {
+.platform-icon {
   font-size: 3rem;
-  font-weight: 900;
-  margin-bottom: 0.5rem;
-  position: relative;
-  z-index: 1;
+}
+
+.platform-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
 }
 
 .platform-desc {
-  font-size: 1.2rem;
-  color: #cccccc;
-  margin-bottom: 3rem;
-  position: relative;
-  z-index: 1;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .download-buttons {
   display: flex;
-  gap: 1.5rem;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
   margin-bottom: 2rem;
-  position: relative;
-  z-index: 1;
-  flex-wrap: wrap;
 }
 
 .download-btn {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.5rem 2.5rem;
-  font-size: 1.1rem;
-  font-weight: 700;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
 }
 
 .download-btn.primary {
@@ -317,122 +313,106 @@ const downloadFile = (url: string) => {
   color: #000000;
 }
 
+.download-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+}
+
 .download-btn.secondary {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
-  border: 2px solid #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.download-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.5s ease, height 0.5s ease;
-}
-
-.download-btn:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-.download-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
-}
-
-.btn-icon {
-  font-size: 2rem;
-  position: relative;
-  z-index: 1;
-}
-
-.btn-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  position: relative;
-  z-index: 1;
+.download-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
 }
 
 .btn-label {
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
 }
 
-.btn-size {
-  font-size: 0.9rem;
+.btn-meta {
+  font-size: 0.875rem;
   opacity: 0.7;
   font-weight: 400;
 }
 
 .requirements {
-  font-size: 0.9rem;
-  color: #888888;
-  position: relative;
-  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 
-.platform-grid {
+.req-icon {
+  font-size: 1rem;
+}
+
+.info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
-.platform-info {
-  text-align: center;
-  padding: 2rem;
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   transition: all 0.3s ease;
 }
 
-.platform-info:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-5px);
+.info-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .info-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  filter: grayscale(100%) brightness(200%);
+  font-size: 2rem;
+  flex-shrink: 0;
 }
 
-.platform-info h4 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.platform-info p {
+.info-content h4 {
   font-size: 1rem;
-  color: #cccccc;
-  line-height: 1.6;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
+}
+
+.info-content p {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
 }
 
 @media (max-width: 768px) {
   .download {
-    padding: 5rem 0;
+    padding: 6rem 0;
   }
 
   .download-card {
-    padding: 3rem 1.5rem;
+    padding: 2rem 1.5rem;
   }
 
-  .download-buttons {
+  .card-header {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
-  .download-btn {
-    width: 100%;
-  }
-
-  .platform-grid {
+  .info-grid {
     grid-template-columns: 1fr;
   }
 }
