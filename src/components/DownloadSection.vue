@@ -13,12 +13,14 @@ interface Release {
     name: string
     size: number
     browser_download_url: string
+    download_count: number
   }>
 }
 
 const release = ref<Release | null>(null)
 const loading = ref(true)
 const error = ref('')
+const totalDownloads = ref(0)
 
 const dmgAsset = computed(() => {
   if (!release.value) return null
@@ -34,12 +36,35 @@ const formatFileSize = (bytes: number): string => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
+const formatDownloadCount = (count: number): string => {
+  if (count >= 1000000) {
+    return (count / 1000000).toFixed(1) + 'M'
+  } else if (count >= 1000) {
+    return (count / 1000).toFixed(1) + 'K'
+  }
+  return count.toString()
+}
+
 onMounted(async () => {
-  // Fetch latest release from GitHub
+  // Fetch latest release and all releases for download count
   try {
-    const response = await fetch('https://api.github.com/repos/Ambot9/nexwork-desktop/releases/latest')
-    if (!response.ok) throw new Error('Failed to fetch release')
-    release.value = await response.json()
+    const [latestResponse, allReleasesResponse] = await Promise.all([
+      fetch('https://api.github.com/repos/Ambot9/nexwork-desktop/releases/latest'),
+      fetch('https://api.github.com/repos/Ambot9/nexwork-desktop/releases')
+    ])
+    
+    if (!latestResponse.ok) throw new Error('Failed to fetch release')
+    release.value = await latestResponse.json()
+    
+    // Calculate total downloads across all releases
+    if (allReleasesResponse.ok) {
+      const allReleases = await allReleasesResponse.json()
+      totalDownloads.value = allReleases.reduce((total: number, rel: Release) => {
+        return total + rel.assets.reduce((assetTotal: number, asset) => {
+          return assetTotal + (asset.download_count || 0)
+        }, 0)
+      }, 0)
+    }
   } catch (e) {
     error.value = 'Failed to load download links'
   } finally {
@@ -150,6 +175,14 @@ const downloadFile = (url: string) => {
           <div class="requirements">
             <span class="req-icon">ℹ️</span>
             <span>macOS 10.15 (Catalina) or later</span>
+          </div>
+
+          <div v-if="totalDownloads > 0" class="download-counter">
+            <div class="counter-icon">📊</div>
+            <div class="counter-content">
+              <span class="counter-number">{{ formatDownloadCount(totalDownloads) }}</span>
+              <span class="counter-label">downloads</span>
+            </div>
           </div>
 
           <div class="install-help">
@@ -394,6 +427,39 @@ const downloadFile = (url: string) => {
 
 .help-icon {
   font-size: 1.2rem;
+}
+
+.download-counter {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(0, 255, 128, 0.05);
+  border: 1px solid rgba(0, 255, 128, 0.2);
+  border-radius: 12px;
+  margin-top: 1.5rem;
+}
+
+.counter-icon {
+  font-size: 2rem;
+}
+
+.counter-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.counter-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #00ff80;
+  line-height: 1;
+}
+
+.counter-label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.25rem;
 }
 
 .help-text {
