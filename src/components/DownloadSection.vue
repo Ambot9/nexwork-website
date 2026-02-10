@@ -151,6 +151,24 @@ const downloadFile = (url: string) => {
             <span class="req-icon">ℹ️</span>
             <span>macOS 10.15 (Catalina) or later</span>
           </div>
+
+          <div class="install-help">
+            <div class="help-header">
+              <span class="help-icon">⚠️</span>
+              <strong>First-time macOS users:</strong>
+            </div>
+            <p class="help-text">
+              If you see a "damaged app" warning, open Terminal and run:
+            </p>
+            <code class="help-command">xattr -cr /Applications/Nexwork.app</code>
+            <a 
+              href="https://github.com/Ambot9/nexwork-desktop/blob/main/INSTALLATION.md" 
+              target="_blank"
+              class="help-link"
+            >
+              Full installation guide →
+            </a>
+          </div>
         </div>
 
         <div class="info-grid">
@@ -355,6 +373,61 @@ const downloadFile = (url: string) => {
 
 .req-icon {
   font-size: 1rem;
+}
+
+.install-help {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 200, 0, 0.05);
+  border: 1px solid rgba(255, 200, 0, 0.2);
+  border-radius: 12px;
+}
+
+.help-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+}
+
+.help-icon {
+  font-size: 1.2rem;
+}
+
+.help-text {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.help-command {
+  display: block;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.help-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.help-link:hover {
+  color: #ffffff;
 }
 
 .info-grid {
