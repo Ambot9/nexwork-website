@@ -177,21 +177,10 @@ const downloadFile = (url: string) => {
             <span>Download for macOS</span>
           </button>
 
-          <a 
-            href="https://github.com/Ambot9/nexwork-desktop"
-            target="_blank"
-            class="btn-download-secondary"
-          >
-            <Github :size="20" />
-            <span>View on GitHub</span>
-          </a>
-        </div>
-
-        <!-- Alternative Downloads -->
-        <div v-if="zipAsset" class="alternative-downloads">
           <button 
+            v-if="zipAsset"
             @click="downloadFile(zipAsset.browser_download_url)"
-            class="btn-download-zip"
+            class="btn-download-secondary"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -199,8 +188,16 @@ const downloadFile = (url: string) => {
               <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
             <span>Download ZIP</span>
-            <span class="btn-meta">({{ formatFileSize(zipAsset.size) }})</span>
           </button>
+
+          <a 
+            href="https://github.com/Ambot9/nexwork-desktop"
+            target="_blank"
+            class="btn-download-tertiary"
+          >
+            <Github :size="20" />
+            <span>View on GitHub</span>
+          </a>
         </div>
 
         <!-- Install Help -->
@@ -406,39 +403,24 @@ const downloadFile = (url: string) => {
   transform: translateY(-2px);
 }
 
-/* Alternative Downloads */
-.alternative-downloads {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.btn-download-zip {
+.btn-download-tertiary {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  background: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 10px;
-  font-size: 0.9rem;
+  padding: 1rem;
+  background: transparent;
+  color: #a855f7;
+  border: none;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
 }
 
-.btn-download-zip:hover {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.5);
-  transform: translateY(-2px);
-}
-
-.btn-download-zip .btn-meta {
-  color: rgba(96, 165, 250, 0.7);
-  font-size: 0.8rem;
-  font-weight: 400;
+.btn-download-tertiary:hover {
+  color: #c084fc;
+  transform: translateY(-1px);
 }
 
 /* Install Help */
