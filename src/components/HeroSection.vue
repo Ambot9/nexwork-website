@@ -46,15 +46,15 @@ const scrollToDownload = () => {
 <template>
   <section ref="heroRef" class="hero">
     <div class="hero-content">
-      <div class="badge">Developer Tools</div>
+      <div class="badge">Multi-account Git desktop</div>
       <h1 ref="titleRef" class="hero-title">
-        Multi-repository<br>feature management,<br><span class="gradient-text">simplified.</span>
+        Multi-repository<br>feature management,<br><span class="gradient-text">built for teams.</span>
       </h1>
       <p ref="subtitleRef" class="hero-subtitle">
-        Nexwork Desktop streamlines your workflow with git worktrees.
+        Nexwork Desktop lets you manage features across workspaces and Git accounts with git worktrees.
       </p>
       <p ref="descriptionRef" class="hero-description">
-        Manage features across multiple repositories with ease. Built for developers who value efficiency and elegance.
+        Connect multiple GitHub and GitLab accounts, keep workspaces and feature lists scoped per account, and ship faster without losing track of branches.
       </p>
       <div ref="ctaRef" class="cta-group">
         <button @click="scrollToDownload" class="cta-button primary">

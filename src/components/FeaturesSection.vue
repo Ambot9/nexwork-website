@@ -13,14 +13,19 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    icon: '⚡',
-    title: 'Lightning Fast',
-    description: 'Built with Electron for native desktop performance and instant feature switching.'
+    icon: '👥',
+    title: 'Multi-account Git',
+    description: 'Use multiple GitHub and GitLab accounts side by side, with a familiar account picker experience.'
   },
   {
     icon: '🎯',
     title: 'Multi-Repository',
     description: 'Manage features across multiple repositories with git worktrees seamlessly.'
+  },
+  {
+    icon: '📂',
+    title: 'Per-account workspaces',
+    description: 'Keep workspace roots scoped per Git account so personal, client, and work repos stay cleanly separated.'
   },
   {
     icon: '🎨',
