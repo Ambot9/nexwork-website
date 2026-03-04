@@ -118,7 +118,11 @@ onMounted(async () => {
 })
 
 const downloadFile = (url: string) => {
-  window.open(url, '_blank')
+	// Open GitHub release asset directly in this tab so the browser
+	// can start the download immediately. GitHub may show a banner
+	// about the optional `gh` CLI, but it is not required to use
+	// Nexwork.
+	window.location.href = url
 }
 </script>
 
@@ -204,10 +208,14 @@ const downloadFile = (url: string) => {
         <div class="install-help">
           <div class="help-header">
             <span class="help-icon">⚠️</span>
-            <strong>First-time macOS users:</strong>
+            <strong>Before you install:</strong>
           </div>
           <p class="help-text">
-            If you see a "damaged app" warning, open Terminal and run:
+            Downloads are hosted on GitHub Releases. You may briefly see a GitHub page or a banner suggesting the
+            GitHub CLI; this is completely optional and not required to use Nexwork.
+          </p>
+          <p class="help-text">
+            If you see a "damaged app" warning on macOS, open Terminal and run:
           </p>
           <code class="help-command">xattr -cr /Applications/Nexwork.app</code>
           <a 

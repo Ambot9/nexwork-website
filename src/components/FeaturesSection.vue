@@ -23,6 +23,11 @@ const features: Feature[] = [
     description: 'Manage features across multiple repositories with git worktrees seamlessly.'
   },
   {
+    icon: '🩺',
+    title: 'Workspace Health',
+    description: 'Scan repo sync status, dirty working trees, and remote access issues at a glance.'
+  },
+  {
     icon: '📂',
     title: 'Per-account workspaces',
     description: 'Keep workspace roots scoped per Git account so personal, client, and work repos stay cleanly separated.'
