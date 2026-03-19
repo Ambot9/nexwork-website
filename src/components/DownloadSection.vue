@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Cloud, Github } from 'lucide-vue-next'
+import { ArrowRight, Download, Github, Sparkles } from 'lucide-vue-next'
 
 gsap.registerPlugin(ScrollTrigger)
 
 interface Release {
   tag_name: string
-  name: string
-  body: string
+  published_at?: string
   assets: Array<{
     name: string
     size: number
@@ -24,208 +23,197 @@ const error = ref('')
 const totalDownloads = ref(0)
 const githubStars = ref(0)
 
-const dmgAsset = computed(() => {
-  if (!release.value) return null
-  return release.value.assets.find(asset => asset.name.endsWith('.dmg'))
+const dmgAsset = computed(() => release.value?.assets.find((asset) => asset.name.endsWith('.dmg')) || null)
+const zipAsset = computed(() => release.value?.assets.find((asset) => asset.name.endsWith('.zip')) || null)
+const currentVersion = computed(() => release.value?.tag_name || 'v1.1.0-beta.2')
+const publishedDate = computed(() => {
+  if (!release.value?.published_at) return 'Latest release'
+  return new Date(release.value.published_at).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 })
 
-const zipAsset = computed(() => {
-  if (!release.value) return null
-  return release.value.assets.find(asset => asset.name.endsWith('.zip'))
-})
-
-const currentVersion = computed(() => {
-  if (!release.value) return 'v1.0.0'
-  return release.value.tag_name
-})
-
-const formatFileSize = (bytes: number): string => {
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+const formatNumber = (count: number) => {
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
+  return String(count)
 }
 
-const formatNumber = (count: number): string => {
-  if (count >= 1000000) {
-    return (count / 1000000).toFixed(1) + 'M'
-  } else if (count >= 1000) {
-    return (count / 1000).toFixed(1) + 'K'
-  }
-  return count.toString()
-}
+const formatFileSize = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 
-// Cast the duration values to number for gsap
-const toNumber = (val: string | number): number => {
-  return typeof val === 'string' ? parseFloat(val) : val
+const downloadFile = (url: string) => {
+  window.location.href = url
 }
 
 onMounted(async () => {
   try {
-    // Fetch release, all releases for download count, and repo info
     const [latestResponse, allReleasesResponse, repoResponse] = await Promise.all([
       fetch('https://api.github.com/repos/Ambot9/nexwork-desktop/releases/latest'),
       fetch('https://api.github.com/repos/Ambot9/nexwork-desktop/releases'),
-      fetch('https://api.github.com/repos/Ambot9/nexwork-desktop')
+      fetch('https://api.github.com/repos/Ambot9/nexwork-desktop'),
     ])
-    
-    if (!latestResponse.ok) throw new Error('Failed to fetch release')
+
+    if (!latestResponse.ok) {
+      throw new Error('Failed to fetch release')
+    }
+
     release.value = await latestResponse.json()
-    
-    // Calculate total downloads
+
     if (allReleasesResponse.ok) {
       const allReleases = await allReleasesResponse.json()
-      totalDownloads.value = allReleases.reduce((total: number, rel: Release) => {
-        return total + rel.assets.reduce((assetTotal: number, asset) => {
-          return assetTotal + (asset.download_count || 0)
-        }, 0)
+      totalDownloads.value = allReleases.reduce((sum: number, item: Release) => {
+        return sum + item.assets.reduce((assetSum, asset) => assetSum + (asset.download_count || 0), 0)
       }, 0)
     }
-    
-    // Get GitHub stars
+
     if (repoResponse.ok) {
       const repoData = await repoResponse.json()
       githubStars.value = repoData.stargazers_count || 0
     }
-  } catch (e) {
-    error.value = 'Failed to load download links'
+  } catch {
+    error.value = 'Could not load the latest release metadata.'
   } finally {
     loading.value = false
   }
 
-  // Animations
-  gsap.from('.download-badges', {
+  gsap.from('.download-shell', {
     scrollTrigger: {
-      trigger: '.download-badges',
-      start: 'top 85%',
-      toggleActions: 'play none none reverse'
+      trigger: '.download-shell',
+      start: 'top 82%',
+      toggleActions: 'play none none reverse',
     },
-    y: 30,
+    y: 42,
     opacity: 0,
-    duration: 0.8,
-    ease: 'power3.out'
-  })
-
-  gsap.from('.download-buttons-row', {
-    scrollTrigger: {
-      trigger: '.download-buttons-row',
-      start: 'top 85%',
-      toggleActions: 'play none none reverse'
-    },
-    y: 30,
-    opacity: 0,
-    duration: 0.8,
-    delay: 0.2,
-    ease: 'power3.out'
+    duration: 0.9,
+    ease: 'power3.out',
   })
 })
-
-const downloadFile = (url: string) => {
-	// Open GitHub release asset directly in this tab so the browser
-	// can start the download immediately. GitHub may show a banner
-	// about the optional `gh` CLI, but it is not required to use
-	// Nexwork.
-	window.location.href = url
-}
 </script>
 
 <template>
   <section id="download" class="download">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">
-          Ready to <span class="gradient-text">get started?</span>
-        </h2>
-        <p class="section-subtitle">
-          Download Nexwork Desktop and streamline your workflow today.
-        </p>
-      </div>
-
-      <div v-if="loading" class="loading">
-        <div class="spinner"></div>
-        <p>Loading download...</p>
-      </div>
-
-      <div v-else-if="error" class="error">
-        <p>{{ error }}</p>
-        <a href="https://github.com/Ambot9/nexwork-desktop/releases" target="_blank" class="github-link">
-          View on GitHub →
-        </a>
-      </div>
-
-      <div v-else class="download-content">
-        <!-- Badges Row -->
-        <div class="download-badges">
-          <span class="badge badge-version">{{ currentVersion }}</span>
-          <span class="badge badge-os">macOS 10.15+</span>
-          <span class="badge badge-license">Free</span>
-          <span v-if="githubStars > 0" class="badge badge-stars">
-            <Github :size="14" />
-            {{ formatNumber(githubStars) }} stars
-          </span>
-          <span v-if="totalDownloads > 0" class="badge badge-downloads">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            {{ formatNumber(totalDownloads) }} downloads
-          </span>
+    <div class="download-shell">
+      <div class="download-copy">
+        <div class="download-kicker">
+          <Sparkles :size="15" />
+          Latest release, direct from GitHub
         </div>
 
-        <!-- Download Buttons -->
-        <div class="download-buttons-row">
-          <button 
+        <h2>Install the current Nexwork build, then let the desktop app handle future updates.</h2>
+
+        <p>
+          The website always points to the newest published desktop release. Once Nexwork is installed, the app can
+          check for updates, download them in the background, and prompt for restart when the new build is ready.
+        </p>
+
+        <div v-if="!loading && !error" class="release-meta">
+          <span>{{ currentVersion }}</span>
+          <span>{{ publishedDate }}</span>
+          <span v-if="githubStars > 0">{{ formatNumber(githubStars) }} GitHub stars</span>
+          <span v-if="totalDownloads > 0">{{ formatNumber(totalDownloads) }} downloads</span>
+        </div>
+
+        <div class="download-points">
+          <div class="download-point">
+            <strong>For teams</strong>
+            <span>Use one installable app for feature orchestration, Git visibility, and memory-aware delivery.</span>
+          </div>
+          <div class="download-point">
+            <strong>For evaluators</strong>
+            <span>Start with the latest macOS release and inspect the full source, release notes, and updater flow.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="download-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-label">Current desktop release</div>
+            <h3>{{ currentVersion }}</h3>
+          </div>
+          <div class="panel-status">macOS build available</div>
+        </div>
+
+        <div v-if="loading" class="state-card">
+          <div class="state-spinner"></div>
+          <div>
+            <strong>Loading latest release</strong>
+            <span>Pulling release metadata from GitHub.</span>
+          </div>
+        </div>
+
+        <div v-else-if="error" class="state-card state-card-error">
+          <div>
+            <strong>{{ error }}</strong>
+            <span>You can still download directly from GitHub Releases.</span>
+          </div>
+          <a href="https://github.com/Ambot9/nexwork-desktop/releases" target="_blank" rel="noreferrer">
+            Open releases
+          </a>
+        </div>
+
+        <template v-else>
+          <button
             v-if="dmgAsset"
+            class="download-action download-action-primary"
             @click="downloadFile(dmgAsset.browser_download_url)"
-            class="btn-download-primary"
           >
-            <Cloud :size="20" />
-            <span>Download for macOS</span>
+            <div>
+              <strong>Download DMG</strong>
+              <span>{{ formatFileSize(dmgAsset.size) }} • Recommended installer</span>
+            </div>
+            <ArrowRight :size="18" />
           </button>
 
-          <button 
-            v-if="zipAsset"
-            @click="downloadFile(zipAsset.browser_download_url)"
-            class="btn-download-secondary"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            <span>Download ZIP</span>
+          <button v-if="zipAsset" class="download-action" @click="downloadFile(zipAsset.browser_download_url)">
+            <div>
+              <strong>Download ZIP</strong>
+              <span>{{ formatFileSize(zipAsset.size) }} • Portable archive</span>
+            </div>
+            <Download :size="18" />
           </button>
 
-          <a 
+          <a
+            href="https://github.com/Ambot9/nexwork-desktop/releases"
+            target="_blank"
+            rel="noreferrer"
+            class="download-action"
+          >
+            <div>
+              <strong>Read the release notes</strong>
+              <span>Review packaged changes, assets, and distribution history.</span>
+            </div>
+            <ArrowRight :size="18" />
+          </a>
+
+          <a
             href="https://github.com/Ambot9/nexwork-desktop"
             target="_blank"
-            class="btn-download-tertiary"
+            rel="noreferrer"
+            class="download-action download-action-link"
           >
-            <Github :size="20" />
-            <span>View on GitHub</span>
+            <div>
+              <strong>Review the source</strong>
+              <span>Browse the desktop codebase, docs, and issue tracker on GitHub.</span>
+            </div>
+            <Github :size="18" />
           </a>
-        </div>
 
-        <!-- Install Help -->
-        <div class="install-help">
-          <div class="help-header">
-            <span class="help-icon">⚠️</span>
-            <strong>Before you install:</strong>
+          <div class="install-note">
+            <strong>macOS note</strong>
+            <p>If Gatekeeper warns after download, run the command below once and reopen the app.</p>
+            <code>xattr -cr /Applications/Nexwork.app</code>
+            <a
+              href="https://github.com/Ambot9/nexwork-desktop/blob/main/INSTALLATION.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Installation guide
+            </a>
           </div>
-          <p class="help-text">
-            Downloads are hosted on GitHub Releases. You may briefly see a GitHub page or a banner suggesting the
-            GitHub CLI; this is completely optional and not required to use Nexwork.
-          </p>
-          <p class="help-text">
-            If you see a "damaged app" warning on macOS, open Terminal and run:
-          </p>
-          <code class="help-command">xattr -cr /Applications/Nexwork.app</code>
-          <a 
-            href="https://github.com/Ambot9/nexwork-desktop/blob/main/INSTALLATION.md" 
-            target="_blank"
-            class="help-link"
-          >
-            Full installation guide →
-          </a>
-        </div>
+        </template>
       </div>
     </div>
   </section>
@@ -234,283 +222,297 @@ const downloadFile = (url: string) => {
 <style scoped>
 .download {
   position: relative;
-  padding: 10rem 0;
-  background: #000000;
+  padding: 24px 24px 104px;
   z-index: 1;
 }
 
-.container {
-  max-width: 800px;
+.download-shell {
+  width: min(1240px, calc(100% - 16px));
   margin: 0 auto;
-  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 500px);
+  gap: 28px;
+  align-items: start;
 }
 
-.section-header {
-  text-align: center;
-  margin-bottom: 3rem;
+.download-copy {
+  padding: 28px 8px 0 0;
 }
 
-.section-title {
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  margin-bottom: 1rem;
-  color: #ffffff;
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #666666 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.section-subtitle {
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.7;
-}
-
-.loading, .error {
-  text-align: center;
-  padding: 3rem;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.github-link {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.github-link:hover {
-  color: #ffffff;
-}
-
-.download-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
-}
-
-/* Badges */
-.download-badges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.75rem;
-}
-
-.badge {
+.download-kicker {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid var(--line);
+  color: var(--mint);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.download-copy h2 {
+  margin: 0 0 16px;
+  max-width: 760px;
+  font-size: clamp(2rem, 4.4vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+  color: var(--surface-dark);
+}
+
+.download-copy p {
+  margin: 0;
+  max-width: 700px;
+  color: var(--text-soft);
+  font-size: 1.03rem;
+  line-height: 1.82;
+}
+
+.release-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.release-meta span {
+  display: inline-flex;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.download-points {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.download-point {
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-md);
+}
+
+.download-point strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.98rem;
+  color: var(--surface-dark);
+}
+
+.download-point span {
+  color: var(--text-soft);
+  line-height: 1.65;
+}
+
+.download-panel {
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  border-radius: 30px;
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.98)),
+    radial-gradient(circle at top right, rgba(31, 122, 236, 0.12), transparent 36%);
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(20px);
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 4px;
+}
+
+.panel-label {
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  font-weight: 800;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.8rem;
+  letter-spacing: -0.04em;
+  color: var(--surface-dark);
+}
+
+.panel-status {
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: var(--mint-soft);
+  color: var(--mint);
+  font-size: 0.8rem;
+  font-weight: 700;
   white-space: nowrap;
 }
 
-.badge-version {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.badge-os {
-  background: rgba(34, 197, 94, 0.15);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-.badge-license {
-  background: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
-  border: 1px solid rgba(168, 85, 247, 0.3);
-}
-
-.badge-stars {
-  background: rgba(234, 179, 8, 0.15);
-  color: #facc15;
-  border: 1px solid rgba(234, 179, 8, 0.3);
-}
-
-.badge-downloads {
-  background: rgba(249, 115, 22, 0.15);
-  color: #fb923c;
-  border: 1px solid rgba(249, 115, 22, 0.3);
-}
-
-/* Download Buttons */
-.download-buttons-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.btn-download-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2rem;
-  background: #2563eb;
-  color: #ffffff;
-  border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-}
-
-.btn-download-primary:hover {
-  background: #1d4ed8;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
-}
-
-.btn-download-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn-download-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-.btn-download-tertiary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem;
-  background: transparent;
-  color: #a855f7;
-  border: none;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.btn-download-tertiary:hover {
-  color: #c084fc;
-  transform: translateY(-1px);
-}
-
-/* Install Help */
-.install-help {
-  width: 100%;
-  max-width: 600px;
-  padding: 1.5rem;
-  background: rgba(255, 200, 0, 0.05);
-  border: 1px solid rgba(255, 200, 0, 0.2);
-  border-radius: 12px;
-}
-
-.help-header {
+.download-action,
+.state-card {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.9rem;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
 }
 
-.help-icon {
-  font-size: 1.2rem;
+.download-action {
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 
-.help-text {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 0.75rem;
-  line-height: 1.5;
+.download-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 30px rgba(20, 46, 86, 0.08);
+  border-color: rgba(31, 122, 236, 0.18);
 }
 
-.help-command {
+.download-action-primary {
+  border: none;
+  background: linear-gradient(135deg, var(--accent) 0%, #145ed4 100%);
+  color: #fff;
+  box-shadow: 0 18px 34px rgba(31, 122, 236, 0.24);
+}
+
+.download-action-link {
+  background: rgba(241, 247, 255, 0.92);
+}
+
+.download-action strong,
+.state-card strong {
   display: block;
-  padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  font-family: 'Monaco', 'Courier New', monospace;
-  font-size: 0.875rem;
-  color: #ffffff;
-  margin-bottom: 1rem;
-  overflow-x: auto;
+  font-size: 1rem;
 }
 
-.help-link {
-  display: inline-flex;
+.download-action span,
+.state-card span {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.download-action-primary span {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.state-card {
+  justify-content: flex-start;
+}
+
+.state-card-error {
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.8);
+}
+
+.state-card-error a {
+  flex-shrink: 0;
+  color: var(--accent-strong);
+  font-weight: 700;
   text-decoration: none;
-  transition: color 0.3s ease;
 }
 
-.help-link:hover {
-  color: #ffffff;
+.state-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(31, 122, 236, 0.18);
+  border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
 }
 
-@media (max-width: 768px) {
+.install-note {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(13, 23, 38, 0.96);
+  color: #e7eef9;
+}
+
+.install-note strong {
+  font-size: 0.96rem;
+}
+
+.install-note p {
+  margin: 0;
+  color: rgba(231, 238, 249, 0.76);
+  line-height: 1.62;
+}
+
+.install-note code {
+  display: inline-flex;
+  width: fit-content;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.install-note a {
+  width: fit-content;
+  color: #87b8ff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1024px) {
+  .download-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .download-copy {
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 720px) {
   .download {
-    padding: 6rem 0;
+    padding: 18px 18px 84px;
   }
 
-  .download-badges {
-    gap: 0.5rem;
+  .download-points {
+    grid-template-columns: 1fr;
   }
 
-  .badge {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
-  }
-
-  .download-buttons-row {
+  .panel-header,
+  .download-action,
+  .state-card {
     flex-direction: column;
-    width: 100%;
+    align-items: flex-start;
   }
 
-  .btn-download-primary,
-  .btn-download-secondary {
-    width: 100%;
-    justify-content: center;
+  .panel-status {
+    white-space: normal;
   }
 }
 </style>

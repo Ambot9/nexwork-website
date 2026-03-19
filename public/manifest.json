@@ -1,11 +1,11 @@
 {
   "name": "Nexwork",
   "short_name": "Nexwork",
-  "description": "Multi-repository feature management, simplified",
+  "description": "A desktop workspace for multi-repo feature delivery and feature memory.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#eef3fb",
+  "theme_color": "#0d1726",
   "icons": [
     {
       "src": "/logo.png",

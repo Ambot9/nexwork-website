@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 
@@ -11,80 +11,91 @@ interface Particle {
   size: number
 }
 
+let animationFrame = 0
+let resizeHandler: (() => void) | null = null
+
 onMounted(() => {
   if (!canvas.value) return
 
   const ctx = canvas.value.getContext('2d')
   if (!ctx) return
 
-  canvas.value.width = window.innerWidth
-  canvas.value.height = window.innerHeight
-
   const particles: Particle[] = []
-  const particleCount = 100
+  const particleCount = 42
 
-  // Create particles - fewer for cleaner look
+  const resize = () => {
+    if (!canvas.value) return
+    canvas.value.width = window.innerWidth
+    canvas.value.height = window.innerHeight
+  }
+
+  resize()
+
   for (let i = 0; i < particleCount; i++) {
     particles.push({
       x: Math.random() * canvas.value.width,
       y: Math.random() * canvas.value.height,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      size: Math.random() * 1.5 + 0.5
+      vx: (Math.random() - 0.5) * 0.18,
+      vy: (Math.random() - 0.5) * 0.18,
+      size: Math.random() * 2.2 + 0.8,
     })
   }
 
-  function animate() {
-    if (!canvas.value || !ctx) return
+  const animate = () => {
+    if (!canvas.value) return
 
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
-    ctx.fillRect(0, 0, canvas.value.width, canvas.value.height)
+    ctx.clearRect(0, 0, canvas.value.width, canvas.value.height)
 
-    particles.forEach((particle, i) => {
-      // Update position
+    particles.forEach((particle, index) => {
       particle.x += particle.vx
       particle.y += particle.vy
 
-      // Bounce off edges
-      if (particle.x < 0 || particle.x > canvas.value!.width) particle.vx *= -1
-      if (particle.y < 0 || particle.y > canvas.value!.height) particle.vy *= -1
+      if (particle.x < -20) particle.x = canvas.value!.width + 20
+      if (particle.x > canvas.value!.width + 20) particle.x = -20
+      if (particle.y < -20) particle.y = canvas.value!.height + 20
+      if (particle.y > canvas.value!.height + 20) particle.y = -20
 
-      // Draw particle - more subtle
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'
+      ctx.fillStyle = 'rgba(31, 122, 236, 0.18)'
       ctx.beginPath()
       ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
       ctx.fill()
 
-      // Connect particles - more subtle and shorter distance
-      particles.forEach((otherParticle, j) => {
-        if (i === j) return
+      for (let otherIndex = index + 1; otherIndex < particles.length; otherIndex += 1) {
+        const otherParticle = particles[otherIndex]
+        if (!otherParticle) continue
 
         const dx = particle.x - otherParticle.x
         const dy = particle.y - otherParticle.y
         const distance = Math.sqrt(dx * dx + dy * dy)
 
-        if (distance < 120) {
-          ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 * (1 - distance / 120)})`
-          ctx.lineWidth = 0.5
+        if (distance < 160) {
+          ctx.strokeStyle = `rgba(15, 181, 141, ${0.08 * (1 - distance / 160)})`
+          ctx.lineWidth = 0.8
           ctx.beginPath()
           ctx.moveTo(particle.x, particle.y)
           ctx.lineTo(otherParticle.x, otherParticle.y)
           ctx.stroke()
         }
-      })
+      }
     })
 
-    requestAnimationFrame(animate)
+    animationFrame = window.requestAnimationFrame(animate)
   }
 
   animate()
 
-  // Handle resize
-  window.addEventListener('resize', () => {
-    if (!canvas.value) return
-    canvas.value.width = window.innerWidth
-    canvas.value.height = window.innerHeight
-  })
+  resizeHandler = resize
+  window.addEventListener('resize', resizeHandler)
+})
+
+onBeforeUnmount(() => {
+  if (animationFrame) {
+    window.cancelAnimationFrame(animationFrame)
+  }
+
+  if (resizeHandler) {
+    window.removeEventListener('resize', resizeHandler)
+  }
 })
 </script>
 
@@ -95,11 +106,11 @@ onMounted(() => {
 <style scoped>
 .particle-canvas {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  opacity: 0.9;
 }
 </style>
